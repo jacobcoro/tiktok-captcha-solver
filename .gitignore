@@ -1,0 +1,7 @@
+# python
+__pycache__/
+venv/
+.env
+
+# chrome image
+google-chrome-stable_current*

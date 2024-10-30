@@ -1,5 +1,4 @@
 import os
-import sys
 from dotenv import load_dotenv
 from tiktok_captcha_solver import PlaywrightSolver
 from playwright.sync_api import sync_playwright, Page
@@ -7,15 +6,12 @@ from playwright_stealth import stealth_sync, StealthConfig
 import time
 
 load_dotenv()
-# Configuration
+
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
-
 LOGIN_URL = "https://seller-us-accounts.tiktok.com/account/login"
-# Load environment variables
 
-# Get API key from environment
-API_KEY = os.getenv('SADCAPTCHA_API_KEY')
+SADCAPTCHA_API_KEY = os.getenv('SADCAPTCHA_API_KEY')
 
 
 def setup_page(page: Page) -> None:
@@ -58,7 +54,7 @@ def login_to_tiktok(page: Page) -> None:
         print("✓ Clicked login button")
 
         # Initialize captcha solver
-        solver = PlaywrightSolver(page, API_KEY)
+        solver = PlaywrightSolver(page, SADCAPTCHA_API_KEY)
 
         # Wait a moment for captcha to appear and solve if present
         time.sleep(2)  # Give time for captcha to appear
@@ -78,8 +74,8 @@ def main():
 
     playwright = sync_playwright().start()
     browser = playwright.chromium.launch(
-        headless=False,  # Show the browser
-        slow_mo=100,     # Slow down actions for debugging
+        # headless=False,  # Show the browser
+        # slow_mo=100,     # Slow down actions for debugging
     )
 
     context = browser.new_context(

@@ -89,7 +89,7 @@ def main():
         login_to_tiktok(page)
 
         # Keep the browser open for inspection
-        input("Press Enter to close the browser...")
+        # input("Press Enter to close the browser...")
     except Exception as e:
         print(f"Fatal error: {str(e)}")
     finally:

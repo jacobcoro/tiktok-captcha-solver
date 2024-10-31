@@ -7,13 +7,10 @@ from sentry import init_sentry, handle_scraper_exception
 from outreach_bot import OutreachMessageBot
 from logger import get_logger
 
+logger = get_logger(__name__)
+
 IS_PROD = getenv('ENVIRONMENT') == 'production'
 TAKE_DEBUG_SCREENS = IS_PROD
-
-FIND_CREATOR_URL = 'https://affiliate-us.tiktok.com/connection/creator?shop_region=US'
-
-# Get a logger instance
-logger = get_logger(__name__)
 
 
 def setup_page(page: Page):

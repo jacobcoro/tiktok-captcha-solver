@@ -8,6 +8,7 @@ from aws import ScreenshotStorage
 
 load_dotenv()
 SENTRY_DSN = os.getenv('SENTRY_DSN')
+IS_PROD = os.getenv('ENVIRONMENT') == 'production'
 
 
 def init_sentry():
@@ -24,6 +25,10 @@ def init_sentry():
 
 
 def handle_scraper_exception(e, page: Page, config,  take_debug_screens: bool = True):
+    if (not IS_PROD):
+        logging.error(f"Exception occurred: {e}")
+        return
+
     picture_name = f"OutreachMessageBot-FAILED-{config.get(
         'agency_campaign_id', 'unknown')}-{config['creator']}"
     picture_url = ''

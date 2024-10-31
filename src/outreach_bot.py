@@ -94,19 +94,12 @@ class OutreachMessageBot:
         self.page.wait_for_selector('textarea')
         self.skip_tip()
 
-        try:
-            textarea = self.page.locator('textarea').first
-            textarea.fill(message)
+        textarea = self.page.locator('textarea').first
+        textarea.fill(message)
 
-            # Only click send in production
-            if self.is_production():
-                self.page.locator('button.arco-btn-primary').first.click()
-
-        except Error as e:
-            logger.warning('Element not found or timeout occurred')
-            if TAKE_DEBUG_SCREENS:
-                self.take_debug_screenshot('SEND_MESSAGE_FAIL')
-            raise  # Re-raise the exception
+        # Only click send in production
+        if self.is_production():
+            self.page.locator('button.arco-btn-primary').first.click()
 
         self.take_debug_screenshot('BIG_SUCCESS')
         logger.info('Complete mission.')

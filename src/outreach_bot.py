@@ -19,7 +19,11 @@ class OutreachMessageBot:
             config['creator']}'")
 
         self.find_creator(config['creator'])
-        self.process_messages(config['message'])
+
+        # if we already have started a convo, and we know the shop_id, creator_id we can skip the find_creator step and go right to the IM
+        # im_url ='https://affiliate-us.tiktok.com/seller/im?shop_id=7495466131724601870&creator_id=7495121012934281660&enter_from=affiliate_creator_details&shop_region=US'
+        # self.page.goto(im_url)            )
+        self.process_messages(config['message'], config['creator'])
 
         return {}
 
@@ -84,26 +88,25 @@ class OutreachMessageBot:
 
         self.move_to_next_plan()
 
-    def process_messages(self, message: str) -> None:
+    def process_messages(self, message: str, creator: str) -> None:
         """Process and send messages to creator"""
         logger.info('processMessages ...')
-        self.page.get_by_text('Inbox')
-        self.page.wait_for_selector(
-            'div#im_sdk_ui_sdk_message_box', timeout=15000)
-        logger.info('Successfully entered the chat page.')
 
-        self.page.wait_for_selector('textarea')
+        self.page.get_by_text('Inbox')
+        self.page.get_by_text('Target collaborations')
+        logger.info('Successfully entered the chat page.')
+        self.page.get_by_text(creator)
+
         self.skip_tip()
 
-        textarea = self.page.locator('textarea').first
+        textarea = self.page.locator('textarea[placeholder="Send a message"]')
         textarea.fill(message)
 
         # Only click send in production
         if self.is_production():
             self.page.locator('button.arco-btn-primary').first.click()
 
-        self.take_debug_screenshot('BIG_SUCCESS')
-        logger.info('Complete mission.')
+        logger.info('Mission accomplished!')
 
     def skip_modal(self) -> None:
         """Skip modal if present"""
@@ -120,7 +123,7 @@ class OutreachMessageBot:
         """Skip tutorial/welcome tip if present"""
         try:
             skip_button = self.page.wait_for_selector('//span[text()="Skip"]/parent::button',
-                                                      timeout=10000)
+                                                      timeout=1000)
             if TAKE_DEBUG_SCREENS:
                 self.take_debug_screenshot('ENCOUNTERING-SKIP-GUIDE')
             if skip_button:

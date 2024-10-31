@@ -59,9 +59,8 @@ def main(sessionid_cookie: str, web_id_cookie: str, message: str, tiktok_account
             browser.close()
         else:
             # keeps script running to leave open in debug to see results
-            dev_input = input("Press any key to close the browser...")
-            if dev_input == "":
-                browser.close()
+            input("Press any key to close the browser...")
+            browser.close()
 
 
 if __name__ == "__main__":

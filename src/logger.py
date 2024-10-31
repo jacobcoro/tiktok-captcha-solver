@@ -20,6 +20,11 @@ def get_logger(name: str, log_file: str = 'app.log', level: int = logging.DEBUG)
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
 
+    # Remove all handlers from the root logger to prevent propagation
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
     # Create file handler
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(level)

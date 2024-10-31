@@ -16,6 +16,10 @@ def get_logger(name: str, log_file: str = 'app.log', level: int = logging.DEBUG)
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
+    # Remove all existing handlers (don't want to print to console)
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
     # Create file handler
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(level)
@@ -26,7 +30,6 @@ def get_logger(name: str, log_file: str = 'app.log', level: int = logging.DEBUG)
     file_handler.setFormatter(formatter)
 
     # Add the handler to the logger
-    if not logger.handlers:
-        logger.addHandler(file_handler)
+    logger.addHandler(file_handler)
 
     return logger

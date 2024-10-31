@@ -6,8 +6,11 @@ from playwright.sync_api import sync_playwright, Page
 from playwright_stealth import stealth_sync, StealthConfig
 import logging
 from playwright.sync_api import Page
+from .sentry import init_sentry, handle_scraper_exception
 
 TAKE_DEBUG_SCREENS = True
+
+FIND_CREATOR_URL = 'https://affiliate-us.tiktok.com/connection/creator?shop_region=US'
 
 
 def setup_page(page: Page):
@@ -36,6 +39,8 @@ def retry_with_captchas(page: Page, message, tiktok_account, retries=3):
             send_message(page, message, tiktok_account)
             break  # Exit loop if message sent successfully
         except Exception as e:
+            handle_scraper_exception(
+                e, page, {'creator': tiktok_account}, TAKE_DEBUG_SCREENS)
             logging.error(f'Error occurred while sending message: {e}')
             if TAKE_DEBUG_SCREENS:
                 page.screenshot(path=f'error_screenshot_{attempt}.png')
@@ -64,6 +69,7 @@ if __name__ == "__main__":
         tiktok_account (str): Name of the creator TikTok account not including @
         _example: python send_message.py --sessionid_cookie <sessionid> --web_id_cookie <web_id> --message <message> --tiktok_account <tiktok_account>
     """
+    init_sentry()
     import argparse
     parser = argparse.ArgumentParser(
         description='Send message using cookies.')

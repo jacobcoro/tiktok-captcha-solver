@@ -1,3 +1,2 @@
 SADCAPTCHA_API_KEY=1232
-EMAIL="123@email.com"
-PASSWORD="123"
+SENTRY_DSN='https://example.com'

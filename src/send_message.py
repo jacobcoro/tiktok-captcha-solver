@@ -1,16 +1,17 @@
-import logging
-from playwright.sync_api import sync_playwright
-from .solve_captcha import main as solve_captcha
-from .set_cookies import set_business_cookies
+from solve_captcha import main as solve_captcha
+from set_cookies import set_business_cookies
 from playwright.sync_api import sync_playwright, Page
 from playwright_stealth import stealth_sync, StealthConfig
-import logging
-from playwright.sync_api import Page
-from .sentry import init_sentry, handle_scraper_exception
+from sentry import init_sentry, handle_scraper_exception
+from outreach_bot import OutreachMessageBot
+from logger import get_logger
 
 TAKE_DEBUG_SCREENS = True
 
 FIND_CREATOR_URL = 'https://affiliate-us.tiktok.com/connection/creator?shop_region=US'
+
+# Get a logger instance
+logger = get_logger(__name__)
 
 
 def setup_page(page: Page):
@@ -24,39 +25,34 @@ def setup_page(page: Page):
     page.set_default_timeout(30000)  # 30 second timeout
 
 
-def send_message(page: Page, message, tiktok_account):
-    """Send a message to a TikTok creator"""
-    logging.info('Sending message...')
-    page.goto(f'https://www.tiktok.com/@{tiktok_account}/message')
-    page.fill('textarea', message)
-    page.click('button[type="submit"]')
-    logging.info('Message sent!')
+def retry_with_captchas(page: Page, message: str, tiktok_account: str, agency_campaign_id: str, retries=3):
+    config = {
+        'creator': tiktok_account,
+        'agency_campaign_id': agency_campaign_id,
+        'message': message
+    }
+    bot = OutreachMessageBot(page)
 
-
-def retry_with_captchas(page: Page, message, tiktok_account, retries=3):
     for attempt in range(retries):
         try:
-            send_message(page, message, tiktok_account)
+            bot.execute(config)
             break  # Exit loop if message sent successfully
         except Exception as e:
             handle_scraper_exception(
                 e, page, {'creator': tiktok_account}, TAKE_DEBUG_SCREENS)
-            logging.error(f'Error occurred while sending message: {e}')
-            if TAKE_DEBUG_SCREENS:
-                page.screenshot(path=f'error_screenshot_{attempt}.png')
             if attempt < retries - 1:
-                logging.info('Retrying...')
+                logger.info('Retrying...')
                 solve_captcha(page)
 
 
-def main(sessionid_cookie, web_id_cookie, message, tiktok_account):
+def main(sessionid_cookie: str, web_id_cookie: str, message: str, tiktok_account: str, agency_campaign_id: str):
     with sync_playwright() as p:
       # if a captcha error is encountered, use the captcha solver and try again
         browser = p.chromium.launch()
         page = browser.new_page()
         setup_page(page)
         set_business_cookies(page, sessionid_cookie, web_id_cookie)
-        retry_with_captchas(page, message, tiktok_account)
+        retry_with_captchas(page, message, tiktok_account, agency_campaign_id)
         browser.close()
 
 
@@ -67,7 +63,9 @@ if __name__ == "__main__":
         web_id_cookie (str): Web ID cookie value
         message (str): Message to send
         tiktok_account (str): Name of the creator TikTok account not including @
-        _example: python send_message.py --sessionid_cookie <sessionid> --web_id_cookie <web_id> --message <message> --tiktok_account <tiktok_account>
+        agency_campaign_id (str): Agency campaign ID
+
+    Usage example: python send_message.py --sessionid_cookie <sessionid> --web_id_cookie <web_id> --message <message> --tiktok_account <tiktok_account> --agency_campaign_id <agency_campaign_id>
     """
     init_sentry()
     import argparse
@@ -80,6 +78,8 @@ if __name__ == "__main__":
     parser.add_argument('--message', required=True, help='Message to send')
     parser.add_argument('--tiktok_account', required=True,
                         help='Name of the creator TikTok account not including @')
+    parser.add_argument('--agency_campaign_id',
+                        required=True, help='Agency campaign ID')
     args = parser.parse_args()
     main(args.sessionid_cookie, args.web_id_cookie,
-         args.message, args.tiktok_account)
+         args.message, args.tiktok_account, args.agency_campaign_id)

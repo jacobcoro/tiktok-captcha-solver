@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import logging
 from playwright.sync_api import Page
 from typing import Optional
+from aws import ScreenshotStorage
 
 load_dotenv()
 SENTRY_DSN = os.getenv('SENTRY_DSN')
@@ -23,9 +24,10 @@ def init_sentry():
 
 
 def handle_scraper_exception(e, page: Page, config,  take_debug_screens: bool = True):
+    picture_name = f"OutreachMessageBot-FAILED-{config.get(
+        'agency_campaign_id', 'unknown')}-{config['creator']}"
+    picture_url = ''
     if take_debug_screens:
-        picture_name = f"OutreachMessageBot-FAILED-{config.get(
-            'agency_campaign_id', 'unknown')}-{config['creator']}"
         picture_url = take_debug_screenshot(page, picture_name)
         logging.error(
             f"OutreachMessageBot interrupted due to a missing element. screenshot link: {picture_url}")
@@ -39,6 +41,6 @@ def handle_scraper_exception(e, page: Page, config,  take_debug_screens: bool = 
 
 def take_debug_screenshot(page: Page, name: str) -> Optional[str]:
     """Take debug screenshot if enabled"""
-    file_name = f"debug_{name}.png"
-    page.screenshot(path=file_name)
-    return file_name
+    screenshot_bytes = page.screenshot()
+    storage = ScreenshotStorage()
+    return storage.save_screenshot(screenshot_bytes, name)

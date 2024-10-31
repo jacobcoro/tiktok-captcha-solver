@@ -1,5 +1,8 @@
-import logging
 from playwright.sync_api import Page
+from logger import get_logger
+
+# Get a logger instance
+logger = get_logger(__name__)
 
 
 def set_business_cookies(page: Page, seller_session_id: str, web_id: str) -> None:
@@ -11,9 +14,9 @@ def set_business_cookies(page: Page, seller_session_id: str, web_id: str) -> Non
         seller_session_id (str): TikTok seller session ID
         web_id (str): TikTok web ID
     """
-    logging.info('Starting setBusinessCookies...')
-    logging.debug(f'setBusinessCookies() params: seller_session_id={
-                  seller_session_id}, web_id={web_id}')
+    logger.info('Starting setBusinessCookies...')
+    logger.debug(f'setBusinessCookies() params: seller_session_id={
+        seller_session_id}, web_id={web_id}')
 
     saved_cookies = [
         {

@@ -1,3 +1,5 @@
+from os import getenv
+
 from playwright.sync_api import Page, TimeoutError, Error
 from logger import get_logger
 
@@ -157,5 +159,4 @@ class OutreachMessageBot:
     @staticmethod
     def is_production() -> bool:
         """Check if running in production environment"""
-        import os
-        return os.getenv('ENVIRONMENT') == 'production'
+        return getenv('ENVIRONMENT') == 'production'

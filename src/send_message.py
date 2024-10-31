@@ -1,3 +1,4 @@
+from os import getenv
 from solve_captcha import main as solve_captcha
 from set_cookies import set_business_cookies
 from playwright.sync_api import sync_playwright, Page
@@ -6,7 +7,8 @@ from sentry import init_sentry, handle_scraper_exception
 from outreach_bot import OutreachMessageBot
 from logger import get_logger
 
-TAKE_DEBUG_SCREENS = True
+IS_PROD = getenv('ENVIRONMENT') == 'production'
+TAKE_DEBUG_SCREENS = IS_PROD
 
 FIND_CREATOR_URL = 'https://affiliate-us.tiktok.com/connection/creator?shop_region=US'
 
@@ -48,12 +50,15 @@ def retry_with_captchas(page: Page, message: str, tiktok_account: str, agency_ca
 def main(sessionid_cookie: str, web_id_cookie: str, message: str, tiktok_account: str, agency_campaign_id: str):
     with sync_playwright() as p:
       # if a captcha error is encountered, use the captcha solver and try again
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(
+            headless=IS_PROD
+        )
         page = browser.new_page()
         setup_page(page)
         set_business_cookies(page, sessionid_cookie, web_id_cookie)
         retry_with_captchas(page, message, tiktok_account, agency_campaign_id)
-        browser.close()
+        if (IS_PROD):
+            browser.close()  # leave open in debug to see results
 
 
 if __name__ == "__main__":

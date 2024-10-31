@@ -12,6 +12,8 @@ IS_PROD = os.getenv('ENVIRONMENT') == 'production'
 
 
 def init_sentry():
+    if (not IS_PROD):
+        return
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         # Set traces_sample_rate to 1.0 to capture 100%

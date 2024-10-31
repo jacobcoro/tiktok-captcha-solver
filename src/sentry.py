@@ -21,6 +21,7 @@ def init_sentry():
         # of sampled transactions.
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
+        environment=os.getenv('ENVIRONMENT', 'development'),
     )
 
 

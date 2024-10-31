@@ -54,8 +54,12 @@ def main(sessionid_cookie: str, web_id_cookie: str, message: str, tiktok_account
         setup_page(page)
         set_business_cookies(page, sessionid_cookie, web_id_cookie)
         retry_with_captchas(page, message, tiktok_account, agency_campaign_id)
+        logger.info('Finished sending message.')
         if (IS_PROD):
-            browser.close()  # leave open in debug to see results
+            browser.close()
+        else:
+            # keeps script running to leave open in debug to see results
+            input("Press Enter to close the browser...")
 
 
 if __name__ == "__main__":

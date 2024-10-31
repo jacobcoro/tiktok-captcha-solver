@@ -87,6 +87,7 @@ class OutreachMessageBot:
     def process_messages(self, message: str) -> None:
         """Process and send messages to creator"""
         logger.info('processMessages ...')
+        self.page.get_by_text('Inbox')
         self.page.wait_for_selector(
             'div#im_sdk_ui_sdk_message_box', timeout=15000)
         logger.info('Successfully entered the chat page.')

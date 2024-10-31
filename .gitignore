@@ -5,3 +5,6 @@ venv/
 
 # chrome image
 google-chrome-stable_current*
+
+# project
+app.log
